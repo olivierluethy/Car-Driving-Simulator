@@ -3,13 +3,84 @@
 
 <head>
     <title>Car Driving Simulator</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/style.css">
     <link rel="shortcut icon" href="assets/favicon.ico">
 </head>
 
 <body>
-    <img class="circle" src="images/car.png" alt="">
-    <script src="script.js"></script>
+    <nav>
+        <div class="grid-container">
+            <div class="grid-item">
+                <!-- Change Road -->
+                <div class="dropdown">
+                    <button class="dropbtn">Change Road</button>
+                    <div class="dropdown-content">
+                        <div class="imageandtext" onclick="changeRoad(1)">
+                            <img src="images/Rennstrecke1.png">
+                            <p>Roalingway</p>
+                        </div>
+                        <div class="imageandtext" onclick="changeRoad(2)">
+                            <img src="images/Rennstrecke2.png">
+                            <p>Bridger</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid-item">
+                <h1>Car Driving Simulator</h1>
+            </div>
+            <div class="grid-item">
+                <!-- Change Car -->
+                <div id="switch">
+                    <button class="dropbtn">Change Car</button>
+                    <div class="dropdown-content">
+                        <div class="imageandtext" onclick="changeCar(1)">
+                            <img src="images/car-rotated.png">
+                            <p>BMW</p>
+                        </div>
+                        <div class="imageandtext" onclick="changeCar(2)">
+                            <img src="images/car2-rotated.png">
+                            <p>Ferrari</p>
+                        </div>
+                        <div class="imageandtext" onclick="changeCar(3)">
+                            <img src="images/car3-rotated.png">
+                            <p>Bughatti</p>
+                        </div>
+                        <div class="imageandtext" onclick="changeCar(4)">
+                            <img src="images/car4-rotated.png">
+                            <p>Sport Car</p>
+                        </div>
+                        <div class="imageandtext" onclick="changeCar(5)">
+                            <img src="images/car5-rotated.png">
+                            <p>Furry Car</p>
+                        </div>
+                        <div class="imageandtext" onclick="changeCar(6)">
+                            <img src="images/car6-rotated.png">
+                            <p>Lamborghini</p>
+                        </div>
+                        <div class="imageandtext" onclick="changeCar(7)">
+                            <img src="images/car7-rotated.png">
+                            <p>Dragon Car</p>
+                        </div>
+                        <div class="imageandtext" onclick="changeCar(8)">
+                            <img src="images/car8-rotated.png">
+                            <p>Untitled</p>
+                        </div>
+                        <div class="imageandtext" onclick="changeCar(9)">
+                            <img src="images/car9-rotated.png">
+                            <p>Untitled</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <img class="route" src="images/Rennstrecke1.png" alt="">
+    <img class="car" src="images/car.png" alt="">
+
+    <script src="js/car.js"></script>
+    <script src="js/switch.js"></script>
 </body>
 
 </html>

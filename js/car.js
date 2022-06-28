@@ -1,4 +1,4 @@
-let myCircle = document.querySelector('.circle');
+let myCircle = document.querySelector('.car');
 /* In welchem Winkel das Auto steht */
 let rotation = 0;
 /* Wie stark es sich nach links bewegt */

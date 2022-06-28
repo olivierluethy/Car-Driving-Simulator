@@ -1,0 +1,135 @@
+body {
+  overflow-x: hidden;
+  padding: 0;
+  margin: 0;
+  text-align: center;
+  font-family: Arial, Helvetica, sans-serif;
+}
+body nav {
+  position: -webkit-sticky;
+  position: sticky;
+  display: flex;
+  top: 0;
+  width: 100%;
+  align-items: center;
+  background-color: white;
+  z-index: 100;
+}
+body nav .grid-container {
+  display: grid;
+  width: 100%;
+  grid-template-columns: auto auto auto;
+}
+body nav .grid-container .grid-item {
+  background-color: rgba(255, 255, 255, 0.8);
+  font-size: 20px;
+  text-align: center;
+  margin-top: auto;
+  margin-bottom: auto;
+  /* Change Road */
+  /* Change Car */
+}
+body nav .grid-container .grid-item .dropdown {
+  display: inline-block;
+  margin: 4px 2px;
+  margin-left: 10rem;
+  cursor: pointer;
+}
+body nav .grid-container .grid-item .dropdown .dropbtn {
+  background-color: lightgreen;
+  color: white;
+  padding: 16px;
+  font-size: 16px;
+  border: 1px solid lightgreen;
+  cursor: pointer;
+}
+body nav .grid-container .grid-item .dropdown .dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  width: 400px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+body nav .grid-container .grid-item .dropdown .dropdown-content .imageandtext {
+  display: flex;
+}
+body nav .grid-container .grid-item .dropdown .dropdown-content .imageandtext img {
+  width: 50%;
+}
+body nav .grid-container .grid-item .dropdown .dropdown-content .imageandtext p {
+  font-size: 1.5rem;
+  text-align: right;
+  font-weight: bold;
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  margin-top: 2rem;
+  margin-left: 2rem;
+  display: block;
+}
+body nav .grid-container .grid-item .dropdown .dropdown-content .imageandtext p:hover {
+  background-color: #f1f1f1;
+}
+body nav .grid-container .grid-item .dropdown .dropdown-content .imageandtext:hover {
+  background-color: #f1f1f1;
+}
+body nav .grid-container .grid-item .dropdown:hover .dropdown-content {
+  display: block;
+}
+body nav .grid-container .grid-item #switch {
+  display: inline-block;
+  margin: 4px 2px;
+  margin-right: 10rem;
+  cursor: pointer;
+}
+body nav .grid-container .grid-item #switch .dropbtn {
+  background-color: orange;
+  border: 1px solid orange;
+  color: white;
+  padding: 16px;
+  font-size: 16px;
+  border: 1px solid orange;
+  cursor: pointer;
+}
+body nav .grid-container .grid-item #switch .dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  width: 400px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+body nav .grid-container .grid-item #switch .dropdown-content .imageandtext {
+  display: flex;
+}
+body nav .grid-container .grid-item #switch .dropdown-content .imageandtext img {
+  width: 50%;
+}
+body nav .grid-container .grid-item #switch .dropdown-content .imageandtext p {
+  font-size: 1.5rem;
+  text-align: right;
+  font-weight: bold;
+  margin-top: 1.2rem;
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+body nav .grid-container .grid-item #switch .dropdown-content .imageandtext p:hover {
+  background-color: #f1f1f1;
+}
+body nav .grid-container .grid-item #switch .dropdown-content .imageandtext:hover {
+  background-color: #f1f1f1;
+}
+body nav .grid-container .grid-item #switch:hover .dropdown-content {
+  display: block;
+}
+body .route {
+  width: auto;
+}
+body .car {
+  width: 5%;
+  left: 400px;
+  top: 2500px;
+}/*# sourceMappingURL=style.css.map */
