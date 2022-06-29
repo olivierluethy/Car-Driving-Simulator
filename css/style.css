@@ -14,6 +14,7 @@ body nav {
   align-items: center;
   background-color: white;
   z-index: 100;
+  box-shadow: 2px 3px 5px grey;
 }
 body nav .grid-container {
   display: grid;
@@ -53,6 +54,7 @@ body nav .grid-container .grid-item .dropdown .dropdown-content {
 }
 body nav .grid-container .grid-item .dropdown .dropdown-content .imageandtext {
   display: flex;
+  background-color: white;
 }
 body nav .grid-container .grid-item .dropdown .dropdown-content .imageandtext img {
   width: 50%;
@@ -68,11 +70,11 @@ body nav .grid-container .grid-item .dropdown .dropdown-content .imageandtext p 
   margin-left: 2rem;
   display: block;
 }
-body nav .grid-container .grid-item .dropdown .dropdown-content .imageandtext p:hover {
-  background-color: #f1f1f1;
-}
 body nav .grid-container .grid-item .dropdown .dropdown-content .imageandtext:hover {
   background-color: #f1f1f1;
+}
+body nav .grid-container .grid-item .dropdown .dropdown-content .imageandtext:nth-child(1) {
+  background-color: red;
 }
 body nav .grid-container .grid-item .dropdown:hover .dropdown-content {
   display: block;
@@ -95,18 +97,20 @@ body nav .grid-container .grid-item #switch .dropbtn {
 body nav .grid-container .grid-item #switch .dropdown-content {
   display: none;
   position: absolute;
+  right: 0px;
   background-color: #f9f9f9;
-  width: 400px;
+  width: 1100px;
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
   z-index: 1;
 }
-body nav .grid-container .grid-item #switch .dropdown-content .imageandtext {
+body nav .grid-container .grid-item #switch .dropdown-content .imageandtext2 {
   display: flex;
+  background-color: white;
 }
-body nav .grid-container .grid-item #switch .dropdown-content .imageandtext img {
+body nav .grid-container .grid-item #switch .dropdown-content .imageandtext2 img {
   width: 50%;
 }
-body nav .grid-container .grid-item #switch .dropdown-content .imageandtext p {
+body nav .grid-container .grid-item #switch .dropdown-content .imageandtext2 p {
   font-size: 1.5rem;
   text-align: right;
   font-weight: bold;
@@ -116,10 +120,7 @@ body nav .grid-container .grid-item #switch .dropdown-content .imageandtext p {
   text-decoration: none;
   display: block;
 }
-body nav .grid-container .grid-item #switch .dropdown-content .imageandtext p:hover {
-  background-color: #f1f1f1;
-}
-body nav .grid-container .grid-item #switch .dropdown-content .imageandtext:hover {
+body nav .grid-container .grid-item #switch .dropdown-content .imageandtext2:hover {
   background-color: #f1f1f1;
 }
 body nav .grid-container .grid-item #switch:hover .dropdown-content {
