@@ -62,7 +62,7 @@
                                     display: block;
                                 }
                                 &:hover {
-                                    background-color: #f1f1f1;
+                                    background-color: lightblue;
                                 }
                             }
                             .imageandtext:nth-child(1) {
@@ -115,7 +115,7 @@
                                     display: block;
                                 }
                                 &:hover {
-                                    background-color: #f1f1f1;
+                                    background-color: lightblue;
                                 }
                             }
                         }
@@ -129,7 +129,7 @@
             }
         }
         .route {
-            width: auto;
+            width: 80%;
         }
         .car {
             width: 5%;

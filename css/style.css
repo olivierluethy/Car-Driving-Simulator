@@ -71,7 +71,7 @@ body nav .grid-container .grid-item .dropdown .dropdown-content .imageandtext p 
   display: block;
 }
 body nav .grid-container .grid-item .dropdown .dropdown-content .imageandtext:hover {
-  background-color: #f1f1f1;
+  background-color: lightblue;
 }
 body nav .grid-container .grid-item .dropdown .dropdown-content .imageandtext:nth-child(1) {
   background-color: red;
@@ -121,13 +121,13 @@ body nav .grid-container .grid-item #switch .dropdown-content .imageandtext2 p {
   display: block;
 }
 body nav .grid-container .grid-item #switch .dropdown-content .imageandtext2:hover {
-  background-color: #f1f1f1;
+  background-color: lightblue;
 }
 body nav .grid-container .grid-item #switch:hover .dropdown-content {
   display: block;
 }
 body .route {
-  width: auto;
+  width: 80%;
 }
 body .car {
   width: 5%;
