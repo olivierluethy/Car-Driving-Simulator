@@ -61,9 +61,6 @@
                                     margin-left: 2rem;
                                     display: block;
                                 }
-                                &:hover {
-                                    background-color: lightblue;
-                                }
                             }
                             .imageandtext:nth-child(1) {
                                 background-color: red;
@@ -114,9 +111,6 @@
                                     text-decoration: none;
                                     display: block;
                                 }
-                                &:hover {
-                                    background-color: lightblue;
-                                }
                             }
                         }
                         &:hover {
@@ -125,6 +119,32 @@
                             }
                         }
                     }
+                }
+            }
+        }
+        .control {
+            position: fixed;
+            left: 15%;
+            bottom: 0;
+            width: 70%;
+            background-color: white;
+            color: white;
+            text-align: center;
+            border: 1px solid black;
+            border-radius: 20px 20px 0px 0px;
+            font-size: 20px;
+            table {
+                width: 100%;
+                img:nth-child(1) {
+                    width: 20%;
+                    margin-right: 2rem;
+                    object-fit: contain;
+                }
+                img:nth-child(2) {
+                    width: 10%;
+                }
+                img:nth-child(3) {
+                    width: 20%;
                 }
             }
         }

@@ -70,9 +70,6 @@ body nav .grid-container .grid-item .dropdown .dropdown-content .imageandtext p 
   margin-left: 2rem;
   display: block;
 }
-body nav .grid-container .grid-item .dropdown .dropdown-content .imageandtext:hover {
-  background-color: lightblue;
-}
 body nav .grid-container .grid-item .dropdown .dropdown-content .imageandtext:nth-child(1) {
   background-color: red;
 }
@@ -120,11 +117,35 @@ body nav .grid-container .grid-item #switch .dropdown-content .imageandtext2 p {
   text-decoration: none;
   display: block;
 }
-body nav .grid-container .grid-item #switch .dropdown-content .imageandtext2:hover {
-  background-color: lightblue;
-}
 body nav .grid-container .grid-item #switch:hover .dropdown-content {
   display: block;
+}
+body .control {
+  position: fixed;
+  left: 15%;
+  bottom: 0;
+  width: 70%;
+  background-color: white;
+  color: white;
+  text-align: center;
+  border: 1px solid black;
+  border-radius: 20px 20px 0px 0px;
+  font-size: 20px;
+}
+body .control table {
+  width: 100%;
+}
+body .control table img:nth-child(1) {
+  width: 20%;
+  margin-right: 2rem;
+  -o-object-fit: contain;
+     object-fit: contain;
+}
+body .control table img:nth-child(2) {
+  width: 10%;
+}
+body .control table img:nth-child(3) {
+  width: 20%;
 }
 body .route {
   width: 80%;
