@@ -1,7 +1,7 @@
 function changeRoad(num) {
     for (var i = 1; i <= 4; i++) {
         if (i == num) {
-            document.querySelector(".route").src = "images/Rennstrecke" + i + ".png";
+            document.querySelector(".route").src = "images/racetrack/Rennstrecke" + i + ".png";
             selectedMap(i);
         }
     }
@@ -21,7 +21,6 @@ function selectedMap(num) {
 function selectedCar(num) {
     elements = document.getElementsByClassName("imageandtext2");
     for (var i = 1; i <= elements.length; i++) {
-        console.log(i);
         if (i == num) {
             elements[(i - 1)].style.backgroundColor = "red";
         } else {
@@ -33,7 +32,7 @@ function selectedCar(num) {
 function changeCar(num) {
     for (var i = 1; i <= 10; i++) {
         if (i == num) {
-            document.querySelector(".car").src = "images/car" + i + ".png";
+            document.querySelector(".car").src = "images/cars/car" + i + ".png";
             selectedCar(i);
         }
     }
