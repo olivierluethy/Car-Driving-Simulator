@@ -1,39 +1,34 @@
 function changeRoad(num) {
-    for (var i = 1; i <= 4; i++) {
+    for (let i = 1; i <= 4; i++) {
+        const routeImage = document.querySelector(".route");
         if (i == num) {
-            document.querySelector(".route").src = "images/racetrack/Rennstrecke" + i + ".png";
-            selectedMap(i);
+            routeImage.src = images / racetrack / Rennstrecke$ {
+                i
+            }.png;
+            selectedImage(i, "imageandtext");
         }
     }
 }
 
-function selectedMap(num) {
-    elements = document.getElementsByClassName("imageandtext");
-    for (var i = 1; i <= elements.length; i++) {
+function selectedImage(num, className) {
+    elements = document.getElementsByClassName(className);
+    for (let i = 1; i <= elements.length; i++) {
         if (i == num) {
-            elements[(i - 1)].style.backgroundColor = "red";
+            elements[i - 1].style.backgroundColor = "red";
         } else {
-            elements[(i - 1)].style.backgroundColor = "white";
-        }
-    }
-}
-
-function selectedCar(num) {
-    elements = document.getElementsByClassName("imageandtext2");
-    for (var i = 1; i <= elements.length; i++) {
-        if (i == num) {
-            elements[(i - 1)].style.backgroundColor = "red";
-        } else {
-            elements[(i - 1)].style.backgroundColor = "white";
+            elements[i - 1].style.backgroundColor = "white";
         }
     }
 }
 
 function changeCar(num) {
-    for (var i = 1; i <= 10; i++) {
+    for (let i = 1; i <= 10; i++) {
+        const carImage = document.querySelector(".car");
         if (i == num) {
-            document.querySelector(".car").src = "images/cars/car" + i + ".png";
-            selectedCar(i);
+            carImage.src = images / cars / car$ {
+                i
+            }.png;
+            selectedImage(i, "imageandtext2");
         }
     }
 }
