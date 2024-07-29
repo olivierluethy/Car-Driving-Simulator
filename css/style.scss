@@ -1,106 +1,126 @@
-    body {
-        overflow-x: hidden;
-        padding: 0;
-        margin: 0;
-        text-align: center;
-        font-family: Arial, Helvetica, sans-serif;
-        nav {
-            position: sticky;
-            display: flex;
-            top: 0;
+body {
+    overflow-x: hidden;
+    padding: 0;
+    margin: 0;
+    text-align: center;
+    font-family: Arial, Helvetica, sans-serif;
+
+    nav {
+        position: sticky;
+        display: flex;
+        top: 0;
+        width: 100%;
+        align-items: center;
+        background-color: white;
+        z-index: 100;
+        box-shadow: 2px 3px 5px grey;
+
+        .grid-container {
+            display: grid;
             width: 100%;
-            align-items: center;
-            background-color: white;
-            z-index: 100;
-            box-shadow: 2px 3px 5px grey;
-            .grid-container {
-                display: grid;
-                width: 100%;
-                grid-template-columns: auto auto auto;
-                .grid-item {
-                    background-color: rgba(255, 255, 255, 0.8);
-                    font-size: 20px;
-                    text-align: center;
-                    margin-top: auto;
-                    margin-bottom: auto;
-                    /* Change Road */
-                    .dropdown {
-                        display: inline-block;
-                        margin: 4px 2px;
-                        margin-left: 10rem;
+            grid-template-columns: auto auto auto;
+
+            .grid-item {
+                background-color: rgba(255, 255, 255, 0.8);
+                font-size: 20px;
+                text-align: center;
+                margin-top: auto;
+                margin-bottom: auto;
+
+                /* Change Road */
+                .dropdown {
+                    display: inline-block;
+                    margin: 4px 2px;
+                    cursor: pointer;
+
+                    .dropbtn {
+                        background-color: lightgreen;
+                        color: white;
+                        padding: 16px;
+                        font-size: 16px;
+                        border: 1px solid lightgreen;
                         cursor: pointer;
-                        .dropbtn {
-                            background-color: lightgreen;
-                            color: white;
-                            padding: 16px;
-                            font-size: 16px;
-                            border: 1px solid lightgreen;
-                            cursor: pointer;
-                        }
-                        .dropdown-content {
-                            display: none;
-                            position: absolute;
-                            background-color: #f9f9f9;
-                            width: 400px;
-                            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-                            z-index: 1;
-                            .imageandtext {
-                                display: flex;
-                                background-color: white;
-                                img {
-                                    width: 50%;
-                                }
-                                p {
-                                    font-size: 1.5rem;
-                                    text-align: right;
-                                    font-weight: bold;
-                                    color: black;
-                                    padding: 12px 16px;
-                                    text-decoration: none;
-                                    margin-top: 2rem;
-                                    margin-left: 2rem;
-                                    display: block;
-                                }
+                    }
+
+                    .dropdown-content {
+                        display: none;
+                        position: absolute;
+                        background-color: #f9f9f9;
+                        width: 400px;
+                        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+                        z-index: 1;
+
+                        .imageandtext {
+                            display: flex;
+                            background-color: white;
+
+                            img {
+                                width: 50%;
                             }
-                            .imageandtext:nth-child(1) {
-                                background-color: red;
-                            }
-                        }
-                        &:hover {
-                            .dropdown-content {
+
+                            p {
+                                font-size: 1.5rem;
+                                text-align: right;
+                                font-weight: bold;
+                                color: black;
+                                padding: 12px 16px;
+                                text-decoration: none;
+                                margin-top: 2rem;
+                                margin-left: 2rem;
                                 display: block;
+                                &.selected {
+                                    background-color: red;
+                                }
+    
+                                &:hover {
+                                    background-color: yellow;
+                                }
+    
+                                &.selected:hover {
+                                    background-color: red; /* Ensure hover color is applied on selected items */
+                                }
                             }
                         }
                     }
-                    /* Change Car */
-                    #switch {
-                        display: inline-block;
-                        margin: 4px 2px;
-                        margin-right: 10rem;
+
+                    &:hover .dropdown-content {
+                        display: block;
+                    }
+                }
+
+                /* Change Car */
+                #switch {
+                    display: inline-block;
+                    margin: 4px 2px;
+                    cursor: pointer;
+
+                    .dropbtn {
+                        background-color: orange;
+                        color: white;
+                        padding: 16px;
+                        font-size: 16px;
+                        border: 1px solid orange;
                         cursor: pointer;
-                        .dropbtn {
-                            background-color: orange;
-                            border: 1px solid orange;
-                            color: white;
-                            padding: 16px;
-                            font-size: 16px;
-                            border: 1px solid orange;
-                            cursor: pointer;
-                        }
-                        .dropdown-content {
-                            display: none;
-                            position: absolute;
-                            right: 0px;
-                            background-color: #f9f9f9;
-                            width: 1100px;
-                            box-shadow: 0px 8px 16px 0px rgb(0 0 0 / 20%);
-                            z-index: 1;
+                    }
+
+                    .dropdown-content {
+                        display: none;
+                        position: absolute;
+                        right: 0;
+                        background-color: #f9f9f9;
+                        width: 1100px;
+                        box-shadow: 0px 8px 16px 0px rgb(0 0 0 / 20%);
+                        z-index: 1;
+
+                        .grid-item {
                             .imageandtext2 {
                                 display: flex;
                                 background-color: white;
+
                                 img {
                                     width: 50%;
                                 }
+
                                 p {
                                     font-size: 1.5rem;
                                     text-align: right;
@@ -110,54 +130,71 @@
                                     padding: 12px 16px;
                                     text-decoration: none;
                                     display: block;
+                                    &.selected {
+                                        background-color: red;
+                                    }
+    
+                                    &:hover {
+                                        background-color: yellow;
+                                    }
+    
+                                    &.selected:hover {
+                                        background-color: yellow; /* Ensure hover color is applied on selected items */
+                                    }
                                 }
                             }
                         }
-                        &:hover {
-                            .dropdown-content {
-                                display: block;
-                            }
-                        }
+                    }
+
+                    &:hover .dropdown-content {
+                        display: block;
                     }
                 }
             }
         }
-        .control {
-            position: fixed;
-            left: 15%;
-            bottom: 0;
-            width: 70%;
-            background-color: white;
-            color: white;
-            text-align: center;
-            border: 1px solid black;
-            border-radius: 20px 20px 0px 0px;
-            font-size: 20px;
-            z-index: 100;
-            box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-            background-color: rgba(255, 255, 255, 0.7);
-            /* https://stackoverflow.com/questions/11807286/how-to-make-div-background-color-transparent-in-css */
-            table {
-                width: 100%;
-                img:nth-child(1) {
-                    width: 20%;
-                    margin-right: 2rem;
-                    object-fit: contain;
-                }
-                img:nth-child(2) {
-                    width: 10%;
-                }
-                img:nth-child(3) {
-                    width: 20%;
-                }
+    }
+
+    .control {
+        position: fixed;
+        left: 15%;
+        bottom: 0;
+        width: 70%;
+        background-color: white;
+        color: white;
+        text-align: center;
+        border: 1px solid black;
+        border-radius: 20px 20px 0 0;
+        font-size: 20px;
+        z-index: 100;
+        box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+        background-color: rgba(255, 255, 255, 0.7);
+
+        table {
+            width: 100%;
+
+            img:nth-child(1) {
+                width: 20%;
+                margin-right: 2rem;
+                object-fit: contain;
+            }
+
+            img:nth-child(2) {
+                width: 10%;
+            }
+
+            img:nth-child(3) {
+                width: 20%;
             }
         }
-        .route {
-            width: 100%;
-        }
-        .car {
-            width: 5%;
-            left: 400px;
-            top: 2500px;
-        }
     }
+
+    .route {
+        width: 100%;
+    }
+
+    .car {
+        width: 5%;
+        left: 400px;
+        top: 2500px;
+    }
+}
