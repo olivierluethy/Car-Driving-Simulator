@@ -1,128 +1,218 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" class="dark">
 
 <head>
-    <title>Car Driving Simulator</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="shortcut icon" href="assets/favicon.ico">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Apex — Driving Simulator</title>
+  <link rel="shortcut icon" href="assets/favicon.ico" />
 
-    <script defer src="js/car.js"></script>
-    <script defer src="js/switch.js"></script>
+  <!-- Tailwind CSS (Play CDN). Pragmatic for a no-build static project; for
+       production you'd swap this for a compiled build (see README). -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Racing-inspired typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap"
+    rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['Orbitron', 'sans-serif'],
+            mono: ['Rajdhani', 'sans-serif'],
+          },
+          colors: {
+            apex: {
+              bg: '#0a0c10',
+              panel: '#12151c',
+              panel2: '#171b24',
+              line: '#262b36',
+              accent: '#e11d2a',
+              accent2: '#22d3ee',
+              good: '#22c55e',
+              bad: '#ef4444',
+              mut: '#7c8597',
+            },
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    html, body { height: 100%; overflow: hidden; background: #0a0c10; }
+    /* Frosted HUD panel look */
+    .hud { background: rgba(18, 21, 28, 0.82); backdrop-filter: blur(8px);
+           border: 1px solid #262b36; box-shadow: 0 8px 30px rgba(0,0,0,.45); }
+    .tab-num { font-variant-numeric: tabular-nums; }
+    /* Fade/slide for the menu overlay */
+    .menu-enter { animation: fadeIn .18s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: scale(.98); } to { opacity: 1; transform: scale(1); } }
+    .flash-good { animation: pulseGood .9s ease-out; }
+    .flash-bad  { animation: pulseBad .9s ease-out; }
+    @keyframes pulseGood { 0%{ text-shadow:0 0 18px #22c55e } 100%{ text-shadow:none } }
+    @keyframes pulseBad  { 0%{ text-shadow:0 0 18px #ef4444 } 100%{ text-shadow:none } }
+    .car-thumb { image-rendering: auto; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-thumb { background: #2a2f3a; border-radius: 4px; }
+  </style>
 </head>
 
-<body>
-    <!-- Navigation Bar -->
-    <nav>
-        <div class="grid-container">
-            <div class="grid-item">
-                <!-- Change Road -->
-                <div class="dropdown">
-                    <button class="dropbtn">Change Road</button>
-                    <div class="dropdown-content">
-                        <div class="imageandtext" onclick="changeRoad(1)">
-                            <img src="images/racetrack/Rennstrecke1.png">
-                            <p>Roalingway</p>
-                        </div>
-                        <div class="imageandtext" onclick="changeRoad(2)">
-                            <img src="images/racetrack/Rennstrecke2.png">
-                            <p>Bridger</p>
-                        </div>
-                        <div class="imageandtext" onclick="changeRoad(3)">
-                            <img src="images/racetrack/Rennstrecke3.png">
-                            <p>Crazy Road</p>
-                        </div>
-                        <div class="imageandtext" onclick="changeRoad(4)">
-                            <img src="images/racetrack/Rennstrecke4.png">
-                            <p>Loopingpool Road</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="grid-item">
-                <h1>Car Driving Simulator</h1>
-            </div>
-            <div class="grid-item">
-                <!-- Change Car -->
-                <div id="switch">
-                    <button class="dropbtn">Change Car</button>
-                    <div class="dropdown-content">
-                        <div class="grid-container">
-                            <div class="grid-item">
-                                <div class="imageandtext2" onclick="changeCar(1)">
-                                    <img src="images/cars/car1-rotated.png">
-                                    <p>BMW</p>
-                                </div>
-                            </div>
-                            <div class="grid-item">
-                                <div class="imageandtext2" onclick="changeCar(2)">
-                                    <img src="images/cars/car2-rotated.png">
-                                    <p>Ferrari</p>
-                                </div>
-                            </div>
-                            <div class="grid-item">
-                                <div class="imageandtext2" onclick="changeCar(3)">
-                                    <img src="images/cars/car3-rotated.png">
-                                    <p>Bughatti</p>
-                                </div>
-                            </div>
-                            <div class="grid-item">
-                                <div class="imageandtext2" onclick="changeCar(4)">
-                                    <img src="images/cars/car4-rotated.png">
-                                    <p>Sport Car</p>
-                                </div>
-                            </div>
-                            <div class="grid-item">
-                                <div class="imageandtext2" onclick="changeCar(5)">
-                                    <img src="images/cars/car5-rotated.png">
-                                    <p>Furry Car</p>
-                                </div>
-                            </div>
-                            <div class="grid-item">
-                                <div class="imageandtext2" onclick="changeCar(6)">
-                                    <img src="images/cars/car6-rotated.png">
-                                    <p>Lamborghini</p>
-                                </div>
-                            </div>
-                            <div class="grid-item">
-                                <div class="imageandtext2" onclick="changeCar(7)">
-                                    <img src="images/cars/car7-rotated.png">
-                                    <p>Dragon Car</p>
-                                </div>
-                            </div>
-                            <div class="grid-item">
-                                <div class="imageandtext2" onclick="changeCar(8)">
-                                    <img src="images/cars/car8-rotated.png">
-                                    <p>White</p>
-                                </div>
-                            </div>
-                            <div class="grid-item">
-                                <div class="imageandtext2" onclick="changeCar(9)">
-                                    <img src="images/cars/car9-rotated.png">
-                                    <p>I'm Blue</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
+<body class="font-mono text-slate-100 select-none">
+  <!-- ===== Game canvas (the world is rendered here) ===== -->
+  <canvas id="game" class="fixed inset-0 w-full h-full block"></canvas>
 
-    <div class="control">
-        <table>
-            <tr>
-                <td><img src="images/tacho.png" alt=""></td>
-                <td>
-                    <img src="images/tacho.png" alt="">
-                </td>
-            </tr>
-        </table>
+  <!-- ===== Top bar ===== -->
+  <header class="fixed top-0 inset-x-0 z-30 flex items-center justify-between px-4 py-2.5">
+    <div class="hud rounded-xl px-4 py-2 flex items-center gap-3">
+      <span class="w-2.5 h-2.5 rounded-full bg-apex-accent shadow-[0_0_10px_#e11d2a]"></span>
+      <span class="font-display font-black tracking-[0.2em] text-sm md:text-base">APEX</span>
+      <span class="text-apex-mut text-xs hidden sm:inline">DRIVING&nbsp;SIM</span>
     </div>
 
-    <!-- Here will be the track displayed -->
-    <img class="route" src="images/racetrack/Rennstrecke1.png" alt="">
-    <!-- Here will be the car displayed -->
-    <img class="car" src="images/cars/car1.png" alt="">
+    <div class="hud rounded-xl px-4 py-1.5 hidden md:flex items-center gap-2 text-center">
+      <div>
+        <div class="text-[10px] tracking-widest text-apex-mut">TRACK</div>
+        <div id="hud-track-name" class="font-display font-bold text-sm">Roalingway</div>
+      </div>
+      <div class="w-px h-7 bg-apex-line mx-2"></div>
+      <div>
+        <div class="text-[10px] tracking-widest text-apex-mut">CAR</div>
+        <div id="hud-car-name" class="font-display font-bold text-sm">BMW</div>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button id="btn-tracks" class="hud rounded-xl px-4 py-2.5 text-xs font-bold tracking-wider hover:border-apex-accent2 transition-colors">
+        TRACKS
+      </button>
+      <button id="btn-cars" class="hud rounded-xl px-4 py-2.5 text-xs font-bold tracking-wider hover:border-apex-accent2 transition-colors">
+        GARAGE
+      </button>
+      <button id="btn-restart" class="hud rounded-xl px-4 py-2.5 text-xs font-bold tracking-wider hover:border-apex-accent transition-colors" title="Restart (R)">
+        ⟲
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== Timing panel (top-center / left) ===== -->
+  <section class="fixed top-20 left-4 z-20 hud rounded-2xl p-4 w-60">
+    <div class="flex items-baseline justify-between mb-1">
+      <span class="text-[10px] tracking-[0.25em] text-apex-mut">CURRENT LAP</span>
+      <span id="lap-count" class="text-[10px] text-apex-mut">LAP 0</span>
+    </div>
+    <div id="lap-current" class="font-display font-black text-3xl tab-num">00:00.00</div>
+
+    <div id="delta-row" class="mt-1 h-6 flex items-center">
+      <span id="lap-delta" class="font-display font-bold text-lg tab-num"></span>
+    </div>
+
+    <div class="mt-3 pt-3 border-t border-apex-line grid grid-cols-2 gap-3">
+      <div>
+        <div class="text-[10px] tracking-widest text-apex-mut">LAST</div>
+        <div id="lap-last" class="font-display font-bold text-base tab-num text-slate-300">--:--.--</div>
+      </div>
+      <div>
+        <div class="text-[10px] tracking-widest text-apex-mut">BEST</div>
+        <div id="lap-best" class="font-display font-bold text-base tab-num text-apex-accent2">--:--.--</div>
+      </div>
+    </div>
+
+    <!-- Sector strip -->
+    <div id="sector-strip" class="mt-3 flex gap-1.5"></div>
+  </section>
+
+  <!-- ===== Bottom dashboard ===== -->
+  <section class="fixed bottom-4 inset-x-0 z-20 flex justify-center px-4">
+    <div class="hud rounded-2xl px-5 py-3 flex items-center gap-5 md:gap-7">
+
+      <!-- Speedometer gauge -->
+      <div class="relative flex-shrink-0">
+        <canvas id="speedo" width="150" height="150" class="w-[120px] h-[120px] md:w-[150px] md:h-[150px]"></canvas>
+        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+          <span id="speed-val" class="font-display font-black text-2xl md:text-3xl leading-none tab-num">0</span>
+          <span class="text-[9px] tracking-[0.2em] text-apex-mut mt-0.5">KM/H</span>
+        </div>
+      </div>
+
+      <!-- Gear -->
+      <div class="text-center flex-shrink-0">
+        <div class="text-[10px] tracking-widest text-apex-mut mb-1">GEAR</div>
+        <div id="gear" class="font-display font-black text-3xl md:text-4xl w-12 h-12 flex items-center justify-center rounded-lg bg-apex-panel2 border border-apex-line">N</div>
+      </div>
+
+      <div class="w-px self-stretch bg-apex-line hidden sm:block"></div>
+
+      <!-- Telemetry grid -->
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2 text-sm">
+        <div>
+          <div class="text-[10px] tracking-widest text-apex-mut">FUEL</div>
+          <div class="flex items-center gap-2">
+            <div class="w-16 h-2 rounded-full bg-apex-panel2 overflow-hidden border border-apex-line">
+              <div id="fuel-bar" class="h-full bg-apex-good transition-all duration-200" style="width:100%"></div>
+            </div>
+            <span id="fuel-pct" class="font-bold tab-num text-xs w-8">100%</span>
+          </div>
+        </div>
+        <div>
+          <div class="text-[10px] tracking-widest text-apex-mut">DISTANCE</div>
+          <div id="distance" class="font-bold tab-num">0.00 km</div>
+        </div>
+        <div>
+          <div class="text-[10px] tracking-widest text-apex-mut">TIME</div>
+          <div id="session-time" class="font-bold tab-num">00:00</div>
+        </div>
+        <div>
+          <div class="text-[10px] tracking-widest text-apex-mut">AVG</div>
+          <div id="avg-speed" class="font-bold tab-num">0 km/h</div>
+        </div>
+        <div>
+          <div class="text-[10px] tracking-widest text-apex-mut">TOP</div>
+          <div id="top-speed" class="font-bold tab-num">0 km/h</div>
+        </div>
+        <div>
+          <div class="text-[10px] tracking-widest text-apex-mut">RANGE</div>
+          <div id="range" class="font-bold tab-num">— km</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Off-track warning -->
+  <div id="offtrack" class="fixed top-1/3 inset-x-0 z-10 text-center opacity-0 transition-opacity duration-150 pointer-events-none">
+    <span class="font-display font-bold tracking-widest text-apex-bad text-lg bg-black/40 px-4 py-1.5 rounded-lg">OFF TRACK</span>
+  </div>
+
+  <!-- Controls hint -->
+  <div class="fixed bottom-4 right-4 z-20 hud rounded-xl px-3 py-2 text-[11px] text-apex-mut hidden lg:block leading-relaxed">
+    <div><span class="text-slate-200 font-bold">↑ / W</span> throttle &nbsp; <span class="text-slate-200 font-bold">↓ / S</span> brake·reverse</div>
+    <div><span class="text-slate-200 font-bold">← → / A D</span> steer &nbsp; <span class="text-slate-200 font-bold">Space</span> handbrake &nbsp; <span class="text-slate-200 font-bold">R</span> reset</div>
+  </div>
+
+  <!-- ===== Selector overlay (tracks / cars) ===== -->
+  <div id="overlay" class="fixed inset-0 z-40 hidden items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+    <div class="menu-enter hud rounded-2xl w-full max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-apex-line">
+        <h2 id="overlay-title" class="font-display font-black tracking-widest text-lg">SELECT</h2>
+        <button id="overlay-close" class="text-apex-mut hover:text-white text-2xl leading-none">×</button>
+      </div>
+      <div id="overlay-body" class="p-6 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 gap-4"></div>
+    </div>
+  </div>
+
+  <!-- Scripts: order matters (config -> data -> systems -> ui -> game) -->
+  <script src="js/config.js"></script>
+  <script src="js/tracks.js"></script>
+  <script src="js/physics.js"></script>
+  <script src="js/timing.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/game.js"></script>
 </body>
 
 </html>
