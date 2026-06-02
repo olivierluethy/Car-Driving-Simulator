@@ -16,7 +16,7 @@
 class TimingSystem {
   constructor(track) {
     this.track = track;
-    this.storageKey = `cds_best_v1_${track.id}`;
+    this.storageKey = `cds_best_v2_${track.id}`; // v2: track layouts redesigned
     this.best = this._load();
     this.reset();
   }

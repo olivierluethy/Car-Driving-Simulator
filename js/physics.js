@@ -19,6 +19,11 @@
  *     speed and reduces steering authority.
  * ========================================================================== */
 
+// Neutral performance modifiers (a brand-new, undamaged car on fresh tyres).
+const IDENTITY_MODS = {
+  topSpeedMul: 1, accelMul: 1, gripMul: 1, brakeMul: 1, steerMul: 1,
+};
+
 class Car {
   constructor(stats) {
     this.setStats(stats);
@@ -39,6 +44,8 @@ class Car {
     this.speed = 0; // px/s along heading (negative = reverse)
     this.steer = 0; // current front-wheel angle (radians)
     this.engineOn = true; // false when out of fuel
+    this.lateralG = 0; // |lateral acceleration| this frame (for tyre wear)
+    this.slip = 0; // 0..1 how far past the grip budget we are (skid intensity)
   }
 
   // Unit forward vector for the current heading (screen coords: +y is down).
@@ -46,15 +53,31 @@ class Car {
     return { x: Math.sin(this.heading), y: -Math.cos(this.heading) };
   }
 
-  /* dt: seconds, input: {throttle,brake,left,right,handbrake}, surface string */
-  update(dt, input, surface) {
-    const onGrass = surface === 'grass';
-    const grip = this.stats.grip * (onGrass ? CONFIG.grassGrip : 1);
+  // Lateral grip budget (lateral accel the tyres can hold before sliding).
+  static BASE_GRIP_ACCEL = 1700;
+
+  /* dt, input:{throttle,brake,left,right,handbrake}, env:{surface,mods,speedLimitKmh,frozen}
+   * surface: a SURFACES entry; mods: condition multipliers; speedLimitKmh: pit
+   * limiter (or null); frozen: held stationary during a pit stop. */
+  update(dt, input, env) {
+    const surface = (env && env.surface) || SURFACES.road;
+    const mods = (env && env.mods) || IDENTITY_MODS;
+
+    // Pit hold: car is parked and serviced — freeze it, recentre the wheel.
+    if (env && env.frozen) {
+      this.speed = 0;
+      this.steer = MathX.approach(this.steer, 0, CONFIG.steerReturn * dt);
+      this.lateralG = 0; this.slip = 0;
+      return;
+    }
+
+    // Effective grip blends the car, the surface, tyre wear & damage.
+    const grip = this.stats.grip * surface.grip * mods.gripMul;
 
     /* --- Steering: ease the wheel toward the requested angle -------------- */
     const speedFrac = Math.min(1, Math.abs(this.speed) / this.maxSpeed);
     // Max usable lock shrinks as we speed up -> wider radius at speed.
-    const maxSteer = MathX.lerp(CONFIG.maxSteerLow, CONFIG.maxSteerHigh, speedFrac) * grip;
+    let maxSteer = MathX.lerp(CONFIG.maxSteerLow, CONFIG.maxSteerHigh, speedFrac) * grip * mods.steerMul;
     let steerInput = 0;
     if (input.left) steerInput -= 1;
     if (input.right) steerInput += 1;
@@ -72,11 +95,12 @@ class Car {
     const hasFuel = this.engineOn;
 
     if (input.throttle && hasFuel) {
-      accel += CONFIG.engineAccel * this.stats.accel / this.stats.mass;
+      accel += CONFIG.engineAccel * this.stats.accel * mods.accelMul * surface.accel / this.stats.mass;
     }
     if (input.brake) {
       if (this.speed > 8) {
-        accel -= CONFIG.brakeDecel; // friction brakes while rolling forward
+        // friction brakes — scaled by the car's braking stat, damage & tyres
+        accel -= CONFIG.brakeDecel * this.stats.braking * mods.brakeMul;
       } else if (hasFuel) {
         accel -= CONFIG.reverseAccel / this.stats.mass; // shift into reverse
       }
@@ -92,31 +116,57 @@ class Car {
     accel -= drag + roll;
     // Engine braking when coasting (no throttle, no brake).
     if (!input.throttle && !input.brake) accel -= CONFIG.engineBrake * v;
-    // Grass eats momentum.
-    if (onGrass) accel -= CONFIG.grassDrag * v;
+    // Off-road surfaces add heavy rolling resistance.
+    accel -= surface.drag * v;
 
     this.speed += accel * dt;
 
     /* --- Speed clamps ----------------------------------------------------- */
-    let topFwd = this.maxSpeed;
-    if (onGrass) topFwd = Math.min(topFwd, CONFIG.grassMaxKmh / CONFIG.speedKmhPerPx);
+    let topFwd = this.maxSpeed * mods.topSpeedMul;
+    if (surface.maxKmh != null) topFwd = Math.min(topFwd, surface.maxKmh / CONFIG.speedKmhPerPx);
+    // Pit-lane speed limiter.
+    if (env && env.speedLimitKmh != null) {
+      topFwd = Math.min(topFwd, env.speedLimitKmh / CONFIG.speedKmhPerPx);
+    }
     this.speed = MathX.clamp(this.speed, -this.maxReverse, topFwd);
     // Snap tiny speeds to zero so the car actually stops (no jitter).
     if (!input.throttle && Math.abs(this.speed) < 3) this.speed = 0;
 
     /* --- Heading: bicycle model. Body turns only while moving ------------- */
+    let omega = 0;
     if (Math.abs(this.speed) > 1) {
-      const omega = (this.speed / CONFIG.wheelbase) * Math.tan(this.steer);
+      omega = (this.speed / CONFIG.wheelbase) * Math.tan(this.steer);
       this.heading += omega * dt;
     }
     // Keep heading in a sane range.
     if (this.heading > Math.PI) this.heading -= 2 * Math.PI;
     if (this.heading < -Math.PI) this.heading += 2 * Math.PI;
 
+    /* --- Cornering load & slip (drives tyre wear and skid marks) ---------- */
+    this.lateralG = Math.abs(this.speed * omega);
+    const gripBudget = Car.BASE_GRIP_ACCEL * grip;
+    this.slip = MathX.clamp(this.lateralG / gripBudget - 0.78, 0, 1);
+    // Locking the brakes / handbrake also lays rubber.
+    if (input.handbrake && Math.abs(this.speed) > 60) this.slip = Math.max(this.slip, 0.7);
+    if (input.brake && this.speed > this.maxSpeed * 0.55) this.slip = Math.max(this.slip, 0.45);
+
     /* --- Integrate position ---------------------------------------------- */
     const f = this.forward();
     this.x += f.x * this.speed * dt;
     this.y += f.y * this.speed * dt;
+  }
+
+  // World positions of the rear tyres (for laying down skid marks).
+  rearWheels() {
+    const f = this.forward();
+    const sx = f.y, sy = -f.x; // side vector (perpendicular to forward)
+    const back = 0.34 * 92; // ~rear axle offset (CAR_LENGTH baked for both types)
+    const halfTrack = 0.30 * 92;
+    const bx = this.x - f.x * back, by = this.y - f.y * back;
+    return [
+      { x: bx + sx * halfTrack, y: by + sy * halfTrack },
+      { x: bx - sx * halfTrack, y: by - sy * halfTrack },
+    ];
   }
 
   // Hit the world boundary: clamp inside and bleed off speed (a soft wall).

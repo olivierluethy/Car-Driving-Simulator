@@ -73,18 +73,25 @@ const UI = (() => {
     el.className =
       'group rounded-xl overflow-hidden border text-left transition-all ' +
       (active ? 'border-apex-accent2 ring-1 ring-apex-accent2' : 'border-apex-line hover:border-apex-accent2');
+    // F1 cars are drawn procedurally; road cars use their PNG sprite.
+    const thumb = c.type === 'f1' ? F1.thumbnail(c.livery) : c.sprite;
+    const badge = c.class
+      ? `<span class="text-[9px] tracking-widest text-apex-accent2 bg-apex-accent2/10 px-1.5 py-0.5 rounded">${c.class}</span>`
+      : '';
     el.innerHTML = `
-      <div class="aspect-square bg-apex-panel2 flex items-center justify-center p-4">
-        <img src="${c.sprite}" alt="${c.name}" class="car-thumb max-h-24 object-contain drop-shadow-lg" />
+      <div class="aspect-square bg-apex-panel2 flex items-center justify-center p-4 relative">
+        ${badge ? `<div class="absolute top-2 left-2">${badge}</div>` : ''}
+        <img src="${thumb}" alt="${c.name}" class="car-thumb max-h-24 object-contain drop-shadow-lg" />
       </div>
       <div class="px-3 py-2 bg-apex-panel">
         <div class="font-display font-bold text-sm flex items-center justify-between">
           ${c.name}
           <span class="w-2.5 h-2.5 rounded-full" style="background:${c.color}"></span>
         </div>
-        ${statBar('SPD', (c.topSpeed - 180) / 160)}
+        ${statBar('SPD', (c.topSpeed - 180) / 180)}
         ${statBar('ACC', (c.accel - 0.8) / 0.6)}
-        ${statBar('GRP', (c.grip - 0.9) / 0.2)}
+        ${statBar('GRP', (c.grip - 0.9) / 0.4)}
+        ${statBar('BRK', (c.braking - 0.9) / 0.5)}
       </div>`;
     el.onclick = () => { window.GameAPI.selectCar(c.id); close(); };
     return el;
@@ -102,7 +109,7 @@ const UI = (() => {
 
   function loadBest(trackId) {
     try {
-      const raw = localStorage.getItem(`cds_best_v1_${trackId}`);
+      const raw = localStorage.getItem(`cds_best_v2_${trackId}`);
       return raw ? JSON.parse(raw) : null;
     } catch (_) { return null; }
   }
