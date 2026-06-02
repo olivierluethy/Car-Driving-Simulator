@@ -80,7 +80,7 @@ const Track = (() => {
   // Smoothstep easing — gives the pit-lane entry/exit their gentle S-curve.
   function smoothstep(t) { t = t < 0 ? 0 : t > 1 ? 1 : t; return t * t * (3 - 2 * t); }
 
-  // Min distance from (x,y) to an OPEN polyline (the pit lane is open).
+  // Min distance from (x,y) to an OPEN polyline (the pit lane / river are open).
   function nearestDistOpen(poly, x, y) {
     let best = Infinity;
     for (let i = 0; i < poly.length - 1; i++) {
@@ -89,6 +89,52 @@ const Track = (() => {
       if (d < best) best = d;
     }
     return best;
+  }
+
+  // Is (x,y) over water? Lakes are ellipses; rivers are wide polylines.
+  function isWaterPoint(water, x, y) {
+    if (!water) return false;
+    for (const l of water.lakes || []) {
+      const dx = (x - l.x) / l.rx, dy = (y - l.y) / l.ry;
+      if (dx * dx + dy * dy <= 1) return true;
+    }
+    for (const r of water.rivers || []) {
+      if (nearestDistOpen(r.pts, x, y) <= r.width / 2) return true;
+    }
+    return false;
+  }
+
+  // Project (x,y) onto the closed centreline: nearest point, its segment index,
+  // distance and side. Used for the bridge corridor constraint.
+  function project(track, x, y) {
+    const c = track.centre, N = c.length;
+    let best = Infinity, bi = 0, px = 0, py = 0;
+    for (let i = 0; i < N; i++) {
+      const a = c[i], b = c[(i + 1) % N];
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const len2 = dx * dx + dy * dy || 1e-6;
+      let t = ((x - a.x) * dx + (y - a.y) * dy) / len2;
+      t = t < 0 ? 0 : t > 1 ? 1 : t;
+      const cx = a.x + t * dx, cy = a.y + t * dy;
+      const d = Math.hypot(x - cx, y - cy);
+      if (d < best) { best = d; bi = i; px = cx; py = cy; }
+    }
+    return { dist: best, idx: bi, px, py };
+  }
+
+  // Group a circular boolean array into contiguous runs of `true` indices.
+  function groupCircular(flag) {
+    const N = flag.length, groups = [];
+    let start = 0;
+    while (start < N && flag[start]) start++;
+    if (start === N) return [Array.from({ length: N }, (_, i) => i)]; // all true
+    let cur = null;
+    for (let k = 0; k < N; k++) {
+      const i = (start + k) % N;
+      if (flag[i]) { if (!cur) { cur = []; groups.push(cur); } cur.push(i); }
+      else cur = null;
+    }
+    return groups;
   }
 
   // Find the MAIN STRAIGHT: the contiguous arc of the lap with the least total
@@ -171,9 +217,22 @@ const Track = (() => {
       maxX: maxX + margin, maxY: maxY + margin,
     };
 
+    const water = def.water || { lakes: [], rivers: [] };
+
+    // ---- Bridges: wherever the road crosses water it becomes a bridge -------
+    // A sample is a bridge if it (or a near neighbour, so decks start on land)
+    // sits over water. Contiguous runs become individual bridges with rails.
+    const wet = centre.map((p) => isWaterPoint(water, p.x, p.y));
+    const PAD = 2;
+    const bridgeFlag = new Array(N).fill(false);
+    for (let i = 0; i < N; i++) {
+      for (let d = -PAD; d <= PAD; d++) { if (wet[(i + d + N) % N]) { bridgeFlag[i] = true; break; } }
+    }
+    const bridges = groupCircular(bridgeFlag);
+
     const pit = buildPitLane(centre, tangents, normals, sIdxs, half);
-    const hazards = buildHazards(centre, tangents, normals, half, def, sIdxs);
-    const trees = scatterTrees(centre, bounds, half, pit, def);
+    const hazards = buildHazards(centre, tangents, normals, half, def, sIdxs, water);
+    const trees = scatterTrees(centre, bounds, half, pit, def, water);
 
     // Starting pose: on the straight, just behind the start/finish line.
     const startTan = gates[0].tangent;
@@ -188,6 +247,7 @@ const Track = (() => {
       width: def.width, half,
       centre, tangents, normals, gates, bounds, trees, start,
       hazards, pit, straight: sIdxs,
+      water, bridges, bridgeFlag,
       checkpointCount: cpCount,
     };
   }
@@ -284,7 +344,7 @@ const Track = (() => {
   function MathClamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
 
   // Gravel / sand run-off traps on the sharpest corners (never on the straight).
-  function buildHazards(centre, tangents, normals, half, def, sIdxs) {
+  function buildHazards(centre, tangents, normals, half, def, sIdxs, water) {
     const N = centre.length;
     const straightSet = new Set(sIdxs);
     const curv = [];
@@ -312,13 +372,14 @@ const Track = (() => {
       const cB = { x: p.x - n.x * dist, y: p.y - n.y * dist };
       const c = nearestDist(centre, cA.x, cA.y) >= nearestDist(centre, cB.x, cB.y) ? cA : cB;
       if (nearestDist(centre, c.x, c.y) <= half) return;
+      if (isWaterPoint(water, c.x, c.y)) return; // no gravel traps in the water
       hazards.push({ type: k % 3 === 2 ? 'sand' : 'gravel', x: c.x, y: c.y, r });
     });
     return hazards;
   }
 
-  // Scatter trees on open grass — never on the road, pit lane, or grandstands.
-  function scatterTrees(centre, bounds, half, pit, def) {
+  // Scatter trees on open grass — never on road, pit lane, grandstands or water.
+  function scatterTrees(centre, bounds, half, pit, def, water) {
     const rand = mulberry32(def.seed || def.id * 7919);
     const trees = [];
     const target = def.trees ?? 60;
@@ -329,6 +390,7 @@ const Track = (() => {
       const y = bounds.minY + rand() * (bounds.maxY - bounds.minY);
       if (nearestDist(centre, x, y) <= half + 70) continue;
       if (nearestDistOpen(pit.lanePoly, x, y) <= pit.width * 1.4) continue;
+      if (isWaterPoint(water, x, y)) continue;
       let blocked = false;
       for (const g of pit.garages) if (Math.hypot(x - g.x, y - g.y) < 130) { blocked = true; break; }
       if (!blocked) for (const s of pit.grandstands) if (Math.hypot(x - s.x, y - s.y) < 230) { blocked = true; break; }
@@ -356,8 +418,9 @@ const Track = (() => {
     // branching off and merging back never crosses grass.
     if (nearestDistOpen(track.pit.lanePoly, x, y) <= track.pit.width / 2) return 'road';
     const d = nearestDist(track.centre, x, y);
-    if (d <= track.half) return 'road';
+    if (d <= track.half) return 'road'; // bridge decks land here too
     if (d <= track.half + KERB) return 'kerb';
+    if (isWaterPoint(track.water, x, y)) return 'water'; // off the deck = open water
     for (const h of track.hazards) {
       if (Math.hypot(x - h.x, y - h.y) <= h.r) return h.type;
     }
@@ -428,14 +491,45 @@ const Track = (() => {
         { x: 1150, y: 1700 }, { x: 560, y: 1450 }, { x: 420, y: 950 },
       ],
     },
+    {
+      // RIVERSIDE — the long, scenic circuit. A big loop with a long main
+      // straight (top-left, on land), fast sweeps down the right, a slow
+      // technical/hairpin section along the bottom, and TWO bridges over a
+      // meandering river, plus infield lakes. Significantly longer than the rest.
+      id: 5, name: 'Riverside GP', theme: 'riverside', seed: 505,
+      width: 240, checkpoints: 8, samples: 16, trees: 95, hazardCount: 5,
+      controls: [
+        { x: 650, y: 440 }, { x: 1500, y: 420 }, { x: 2350, y: 430 }, // main straight
+        { x: 2900, y: 560 }, { x: 3150, y: 820 },                     // -> bridge 1
+        { x: 3700, y: 950 }, { x: 4250, y: 1150 },                    // fast sweep
+        { x: 4560, y: 1700 }, { x: 4400, y: 2300 },                   // right-hand sweepers
+        { x: 3800, y: 2560 }, { x: 3050, y: 2520 },                   // -> bridge 2
+        { x: 2450, y: 2360 }, { x: 2050, y: 2620 }, { x: 1500, y: 2450 }, // technical chicane
+        { x: 900, y: 2350 }, { x: 620, y: 1850 },                     // hairpin
+        { x: 520, y: 1250 }, { x: 560, y: 760 },                      // back straight (left)
+      ],
+      water: {
+        lakes: [
+          { x: 1650, y: 1450, rx: 430, ry: 300 },
+          { x: 4150, y: 1780, rx: 360, ry: 300 },
+        ],
+        rivers: [
+          { width: 330, pts: [
+            { x: 3000, y: 320 }, { x: 2960, y: 1100 }, { x: 3020, y: 1700 },
+            { x: 3060, y: 2300 }, { x: 2980, y: 2900 },
+          ] },
+        ],
+      },
+    },
   ];
 
   // Theme colour palettes for dark-mode rendering.
   const THEMES = {
-    meadow: { grass: '#14321f', grassAlt: '#173a24', road: '#2b2f36', edge: '#3c424b', tree: '#1f6b3a', treeDark: '#15502b' },
-    lake:   { grass: '#102a30', grassAlt: '#123238', road: '#2a2e35', edge: '#3a4049', tree: '#1f6b5a', treeDark: '#134b40' },
-    desert: { grass: '#2e2616', grassAlt: '#352b18', road: '#33302a', edge: '#46413a', tree: '#6b5a1f', treeDark: '#50431a' },
-    night:  { grass: '#161826', grassAlt: '#1b1d2e', road: '#262833', edge: '#363a4a', tree: '#2a3b6b', treeDark: '#1d2b50' },
+    meadow:    { grass: '#14321f', grassAlt: '#173a24', road: '#2b2f36', edge: '#3c424b', tree: '#1f6b3a', treeDark: '#15502b', water: '#10324a', waterEdge: '#1b4e6e' },
+    lake:      { grass: '#102a30', grassAlt: '#123238', road: '#2a2e35', edge: '#3a4049', tree: '#1f6b5a', treeDark: '#134b40', water: '#0e3346', waterEdge: '#176486' },
+    desert:    { grass: '#2e2616', grassAlt: '#352b18', road: '#33302a', edge: '#46413a', tree: '#6b5a1f', treeDark: '#50431a', water: '#13384a', waterEdge: '#1d5570' },
+    night:     { grass: '#161826', grassAlt: '#1b1d2e', road: '#262833', edge: '#363a4a', tree: '#2a3b6b', treeDark: '#1d2b50', water: '#0c1830', waterEdge: '#143a5e' },
+    riverside: { grass: '#13301d', grassAlt: '#173a24', road: '#2b2f36', edge: '#3c424b', tree: '#1f6b3a', treeDark: '#155029', water: '#0f3a54', waterEdge: '#1c5f84' },
   };
 
   const built = DEFS.map(build);
@@ -448,6 +542,8 @@ const Track = (() => {
     segmentsIntersect,
     surfaceAt,
     pointInPit,
+    project,
+    isWater: (track, x, y) => isWaterPoint(track.water, x, y),
     KERB,
   };
 })();

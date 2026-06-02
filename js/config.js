@@ -106,6 +106,8 @@ const SURFACES = {
   grass:  { grip: 0.60, accel: 0.80, drag: 2.6, maxKmh: 70,   wear: 2.0,  damage: 1.0, particle: 'grass',  color: '#3f7d3a' },
   gravel: { grip: 0.50, accel: 0.64, drag: 3.6, maxKmh: 55,   wear: 3.4,  damage: 3.2, particle: 'gravel', color: '#8a7b5c' },
   sand:   { grip: 0.42, accel: 0.50, drag: 4.6, maxKmh: 42,   wear: 4.0,  damage: 4.6, particle: 'sand',   color: '#c9b070' },
+  // Open water (lakes/river off the bridge deck): you bog down — not drivable.
+  water:  { grip: 0.30, accel: 0.28, drag: 5.6, maxKmh: 28,   wear: 1.0,  damage: 2.0, particle: null,     color: '#0f3a54' },
 };
 
 /* -----------------------------------------------------------------------------

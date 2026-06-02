@@ -100,6 +100,7 @@
     document.getElementById('hud-car-name').textContent = G.carData.name;
     buildSectorStrip();
     refreshBest();
+    Minimap.setTrack(G.track);
   }
 
   function restart() {
@@ -163,6 +164,20 @@
 
     // Keep the car inside the playable area; a wall hit at speed = damage.
     if (G.car.clampToBounds(tk.bounds, CAR_LENGTH * 0.5)) G.condition.impact(speedBefore);
+
+    // Bridge guard rails: a hard corridor that keeps the car on the deck so it
+    // can never fall into the water. Brushing the rail scrubs speed + scratches.
+    const proj = Track.project(tk, G.car.x, G.car.y);
+    if (tk.bridgeFlag[proj.idx]) {
+      const maxLat = tk.half - 12;
+      if (proj.dist > maxLat && proj.dist > 0.001) {
+        const nx = (G.car.x - proj.px) / proj.dist, ny = (G.car.y - proj.py) / proj.dist;
+        G.car.x = proj.px + nx * maxLat;
+        G.car.y = proj.py + ny * maxLat;
+        G.condition.impact(G.car.speedKmh * 0.5);
+        G.car.speed *= 0.55;
+      }
+    }
 
     // ---- Fuel (scaled by the car's efficiency) ----
     const speedFrac = Math.abs(G.car.speed) / G.car.maxSpeed;
@@ -244,10 +259,12 @@
     ctx.scale(CONFIG.zoom, CONFIG.zoom);
     ctx.translate(-G.cam.x, -G.cam.y);
 
+    drawWater(theme); // lakes & river, beneath the road
     drawHazards(theme);
     drawRoad(theme);
     drawPitLane(theme);
     drawAtmosphere(theme); // grandstands, garages, pit wall, lights, gantry
+    drawBridges(theme); // bridge decks + guard rails over the water
     drawFinish();
     drawCheckpoints();
     Effects.drawMarks(ctx, vb); // rubber sits on the tarmac, under the car
@@ -258,6 +275,67 @@
 
     ctx.restore();
     drawVignette();
+  }
+
+  // Lakes & river, drawn under the road (the road becomes a bridge over them).
+  function drawWater(theme) {
+    const w = G.track.water;
+    if (!w) return;
+    (w.lakes || []).forEach((l) => {
+      ctx.fillStyle = theme.water;
+      ctx.beginPath();
+      ctx.ellipse(l.x, l.y, l.rx, l.ry, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = theme.waterEdge;
+      ctx.lineWidth = 9;
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,0.05)'; // soft sheen
+      ctx.beginPath();
+      ctx.ellipse(l.x - l.rx * 0.2, l.y - l.ry * 0.28, l.rx * 0.5, l.ry * 0.38, 0, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    (w.rivers || []).forEach((r) => {
+      strokePoly(r.pts, r.width + 12, theme.waterEdge); // banks
+      strokePoly(r.pts, r.width, theme.water);          // water
+      ctx.globalAlpha = 0.07; // current highlight
+      strokePoly(r.pts, r.width * 0.35, '#ffffff');
+      ctx.globalAlpha = 1;
+    });
+  }
+
+  // Bridge decks with guard rails — drawn over the road where it crosses water.
+  function drawBridges(theme) {
+    const tk = G.track, half = tk.half;
+    (tk.bridges || []).forEach((idxList) => {
+      if (idxList.length < 2) return;
+      const left = [], right = [];
+      for (const i of idxList) {
+        const p = tk.centre[i], n = tk.normals[i];
+        left.push({ x: p.x + n.x * (half + 5), y: p.y + n.y * (half + 5) });
+        right.push({ x: p.x - n.x * (half + 5), y: p.y - n.y * (half + 5) });
+      }
+      // deck planks across the road (subtle)
+      ctx.strokeStyle = 'rgba(0,0,0,0.18)';
+      ctx.lineWidth = 3;
+      for (let k = 0; k < idxList.length; k += 2) {
+        const i = idxList[k], p = tk.centre[i], n = tk.normals[i];
+        ctx.beginPath();
+        ctx.moveTo(p.x + n.x * half, p.y + n.y * half);
+        ctx.lineTo(p.x - n.x * half, p.y - n.y * half);
+        ctx.stroke();
+      }
+      // rail base + metallic guard rail
+      strokePoly(left, 9, '#2f343d'); strokePoly(right, 9, '#2f343d');
+      strokePoly(left, 5, '#aab2c0'); strokePoly(right, 5, '#aab2c0');
+      // posts
+      ctx.fillStyle = '#11151c';
+      for (let k = 0; k < idxList.length; k += 2) {
+        for (const rail of [left, right]) {
+          const q = rail[k];
+          ctx.beginPath(); ctx.arc(q.x, q.y, 4, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+    });
   }
 
   // Gravel/sand run-off traps beside the sharp corners.
@@ -785,6 +863,7 @@
     if (!menuOpen()) update(dt);
     render();
     updateHUD();
+    Minimap.draw(G.car);
     requestAnimationFrame(frame);
   }
 
@@ -798,6 +877,7 @@
   };
 
   UI.init();
+  Minimap.init();
   load(1, 1);
   requestAnimationFrame(frame);
 })();

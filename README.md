@@ -178,18 +178,64 @@ off-track, even needing to reverse. The redesign follows motorsport practice:
 The pit side (left/right) is auto-chosen per track based on which side has more
 open space.
 
+---
+
+## Minimap & the Riverside circuit
+
+### 13. Real-time minimap (`js/minimap.js`)
+A dedicated bottom-right canvas. The performance-critical decision is a
+**two-layer render**: the track never changes mid-session, so its art (water,
+tarmac, pit lane, bridges, sector dots, a bright start/finish line) is
+**rasterised once per track to an offscreen canvas** via a world→minimap
+transform built from the centreline's bounding box (so it **auto-scales to any
+track size**). Each frame only does a single `drawImage` of that cached layer
+plus a small **heading-oriented triangle** for the car — so the cost is
+effectively constant no matter how long or detailed the circuit is. It matches
+the dark-mode aesthetic and stays visible at all times.
+
+### 14. Water, bridges & the extended track (`tracks.js`, `game.js`)
+**Riverside GP** (track 5) is a much longer, more scenic circuit: a long main
+straight, fast right-hand sweepers, a slow technical/hairpin section, two infield
+**lakes**, and a meandering **river** crossed by **two bridges**.
+
+- **Water as data.** Each track may declare `water: { lakes:[…ellipses…],
+  rivers:[{pts,width}] }`, drawn under the road. Off the deck, water is a real
+  `SURFACES.water` entry — you bog down — so lakes read as water, not ground.
+- **Bridges are derived, not hand-placed.** Any road sample sitting over water
+  becomes a **bridge** (contiguous runs grouped via `groupCircular`). Bridges
+  render a deck with **metallic guard rails, posts and planks**.
+- **You can't fall off.** `Track.project()` finds the car's lateral offset from
+  the deck centreline; on a bridge a **hard corridor clamp** keeps the body on
+  the deck (brushing the rail scrubs speed and scratches the car). *Validated:
+  with rails the car is clamped to the deck and never reaches the water; without
+  them it would drive straight off.*
+
+Every existing system works on the new track unchanged: the main-straight/pit
+detection, lap & sector timing, persistent best times, damage, and the minimap
+all derive from the same track data.
+
 ## Project structure
 ```
 index.html        Markup + Tailwind config + HUD + pit overlay
 js/config.js      Physics constants, SURFACES table, tyre/damage/pit tuning, cars
-js/tracks.js      Catmull-Rom vector tracks, hazards, pit lane, surfaceAt()
+js/tracks.js      Vector tracks: main-straight, pit lane, hazards, water, bridges
 js/physics.js     Bicycle-model Car (surfaces, condition mods, limiter)
 js/effects.js     Pooled particles + view-culled fading tyre marks
 js/condition.js   Tyre-wear & damage model -> performance modifiers
 js/pit.js         Pit-lane state machine, restrictions, crew animation
 js/f1.js          Procedural F1 car renderer + garage thumbnails
 js/timing.js      Lap/sector timing + localStorage records
+js/minimap.js     Cached-layer real-time circuit minimap
 js/ui.js          Track/garage selector overlays
 js/game.js        Main loop, camera, canvas rendering, input, HUD
 images/           Car sprites + favicon
 ```
+
+### New data structures (this update)
+- **`track.water`** — `{ lakes:[{x,y,rx,ry}], rivers:[{pts:[{x,y}],width}] }`.
+- **`track.bridges`** — array of contiguous centreline-index runs where the road
+  crosses water; **`track.bridgeFlag`** — per-sample boolean for O(1) lookup.
+- **`SURFACES.water`** — the off-deck open-water surface (bogs the car).
+- **`Track.project(track,x,y)`** — nearest point on the centreline (for the
+  bridge corridor); **`Track.isWater(track,x,y)`** — water test.
+- **`Minimap`** — `{ init, setTrack, draw, resize }` with a cached static layer.

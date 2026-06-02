@@ -260,12 +260,21 @@
     <span class="font-display font-bold tracking-widest text-apex-bad text-lg bg-black/40 px-4 py-1.5 rounded-lg">OFF TRACK</span>
   </div>
 
-  <!-- Controls hint -->
-  <div class="fixed bottom-4 right-4 z-20 hud rounded-xl px-3 py-2 text-[11px] text-apex-mut hidden lg:block leading-relaxed">
+  <!-- Controls hint (moved to bottom-left so the minimap owns bottom-right) -->
+  <div class="fixed bottom-4 left-4 z-20 hud rounded-xl px-3 py-2 text-[11px] text-apex-mut hidden lg:block leading-relaxed">
     <div><span class="text-slate-200 font-bold">↑ / W</span> throttle &nbsp; <span class="text-slate-200 font-bold">↓ / S</span> brake·reverse</div>
     <div><span class="text-slate-200 font-bold">← → / A D</span> steer &nbsp; <span class="text-slate-200 font-bold">Space</span> handbrake &nbsp; <span class="text-slate-200 font-bold">R</span> reset</div>
     <div class="mt-0.5 text-apex-accent2">Drive into the pit box (inside the start straight) to service.</div>
   </div>
+
+  <!-- ===== Minimap (bottom-right) ===== -->
+  <section class="fixed bottom-4 right-4 z-20 hud rounded-2xl p-2.5">
+    <div class="flex items-center justify-between mb-1 px-1">
+      <span class="text-[10px] tracking-[0.25em] text-apex-mut">CIRCUIT MAP</span>
+      <span class="w-2 h-2 rounded-full bg-apex-accent shadow-[0_0_8px_#e11d2a]"></span>
+    </div>
+    <canvas id="minimap" class="block rounded-lg w-[180px] h-[128px] md:w-[208px] md:h-[148px]"></canvas>
+  </section>
 
   <!-- ===== Selector overlay (tracks / cars) ===== -->
   <div id="overlay" class="fixed inset-0 z-40 hidden items-center justify-center bg-black/70 backdrop-blur-sm p-4">
@@ -287,6 +296,7 @@
   <script src="js/pit.js"></script>
   <script src="js/f1.js"></script>
   <script src="js/timing.js"></script>
+  <script src="js/minimap.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/game.js"></script>
 </body>
